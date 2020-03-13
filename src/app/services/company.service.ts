@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http
 import { Observable, of } from 'rxjs';
 import { map, catchError, tap, filter } from 'rxjs/operators';
 import { Income } from '../models/Income';
+import { Company } from '../models/Company';
 
 // id, name, city and total income
 @Injectable({
@@ -25,7 +26,9 @@ export class CompanyService {
 	getCompanyIncome(id): Observable<Income[]> {
 		return this.http.get<Income[]>(this._endpoint + 'incomes/' + id);
 	}
-
+	get(id){
+		return this.http.get<Company>(this._endpoint + 'companies/' + id)
+	}
 	getTotalIncome(id): Observable<any> {
 		return this.http.get<any>(this._endpoint + 'incomes/' + id).pipe(
 			map(res => {
