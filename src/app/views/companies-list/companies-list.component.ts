@@ -1,8 +1,8 @@
-import { Component, OnInit, ViewChild, OnDestroy, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { CompanyService } from 'src/app/services/company.service';
 import { Subject } from 'rxjs';
 import { takeUntil, take } from 'rxjs/operators';
-import { MatDialog, MatPaginator, MatSort, MatTableDataSource } from '@angular/material';
+import { MatPaginator, MatSort, MatTableDataSource } from '@angular/material';
 import { Company } from 'src/app/models/Company';
 @Component({
 	selector: 'app-companies-list',
@@ -13,9 +13,11 @@ export class CompaniesListComponent implements OnInit, OnDestroy {
 	@ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
 	@ViewChild(MatSort, { static: true }) sort: MatSort;
 
-	constructor(private _rest: CompanyService) { }
+	constructor(private _companyService: CompanyService) { }
 	private _destroy = new Subject<void>();
 	private _dataSource: MatTableDataSource<Company>;
+	private _companies: Company[];
+	private _companiesLength: number
 	private _tableConfig = {
 		pagination: {
 			length: 100,
@@ -41,48 +43,77 @@ export class CompaniesListComponent implements OnInit, OnDestroy {
 		return this._tableConfig;
 	}
 
-	getPaginatorData($event) {
-		const skip = this.paginator.pageSize * this.paginator.pageIndex;
 
-		const currentItems = this.dataSource.sortData(this.dataSource.filteredData, this.dataSource.sort)
-			.filter((u, i) => i >= skip)
-			.filter((u, i: number) => i < this.paginator.pageSize);
-
-		console.log(this.dataSource.sortData(this.dataSource.filteredData, this.dataSource.sort));
-		currentItems.forEach(item => {
-			this.setTotalIncome(item)
-		})
-		console.log(currentItems);
+	onSetTotalIncomeComplete() {
+		this._companiesLength--;
+		if (this._companiesLength == 0) {
+			this._companies.sort(this.compareValues('totalIncome', 'desc'));
+			this.dataSource = new MatTableDataSource(this._companies);
+			this.dataSource.paginator = this.paginator;
+			this.dataSource.sort = this.sort;
+			console.log('done')
+		}
 	}
 
 	ngOnInit() {
 		this.getCompanies();
+
+	}
+
+	compareValues(key, order = 'asc') {
+		return function innerSort(a, b) {
+			if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
+				return 0;
+			}
+
+			const varA = (typeof a[key] === 'string')
+				? a[key].toUpperCase() : a[key];
+			const varB = (typeof b[key] === 'string')
+				? b[key].toUpperCase() : b[key];
+
+			let comparison = 0;
+			if (varA > varB) {
+				comparison = 1;
+			} else if (varA < varB) {
+				comparison = -1;
+			}
+			return (
+				(order === 'desc') ? (comparison * -1) : comparison
+			);
+		};
 	}
 
 	getCompanies() {
-		return this._rest.getAll().pipe(takeUntil(this._destroy)).subscribe(
+		return this._companyService.getAll().pipe(takeUntil(this._destroy)).subscribe(
 			stream => {
-				this.dataSource = new MatTableDataSource(stream);
-				this.dataSource.paginator = this.paginator;
-				this.dataSource.sort = this.sort;
+				this._companies = stream;
+				this._companiesLength = stream.length;
+
+				stream.forEach(item => {
+					this.setTotalIncome(item)
+				})
 			}, error => {
 				console.log(error)
 			})
 	}
+
 	setTotalIncome(company: Company) {
-		return this._rest.getTotalIncome(company.id).subscribe(
+		return this._companyService.getTotalIncome(company.id).subscribe(
 			data => {
 				company.totalIncome = data;
-			}
+			},
+			error => {
+				console.log(error)
+			},
+			() => this.onSetTotalIncomeComplete()
 		)
 	}
 
-	// companyIncomes(id: number) {
-	// 	return this._rest.getCompanyIncome(id).subscribe(
-	// 		data => console.log(data)
-	// 	)
-	// }
-
+	applyFilter(event: Event) {
+		const filterValue = (event.target as HTMLInputElement).value;
+		this.dataSource.filter = filterValue.trim().toLowerCase();
+	}
+	
 	ngOnDestroy() {
 		this._destroy.unsubscribe();
 	}
