@@ -6,6 +6,7 @@ import { MatPaginator, MatSort, MatTableDataSource } from '@angular/material';
 import { Company } from 'src/app/models/Company';
 import { HelpersService } from 'src/app/services/helpers.service';
 import { Router } from '@angular/router';
+import { SessionService } from 'src/app/services/session.service';
 
 @Component({
 	selector: 'app-companies-list',
@@ -16,7 +17,12 @@ export class CompaniesListComponent implements OnInit, OnDestroy {
 	@ViewChild(MatPaginator, { static: true }) paginator: MatPaginator;
 	@ViewChild(MatSort, { static: true }) sort: MatSort;
 
-	constructor(private _companyService: CompanyService, private _helpers: HelpersService, private _router: Router) { }
+	constructor(
+		private _companyService: CompanyService, 
+		private _helpers: HelpersService, 
+		private _router: Router,
+		private _sessionService: SessionService
+		) { }
 	private _destroy = new Subject<void>();
 	private _dataSource: MatTableDataSource<Company>;
 	private _companies: Company[];
@@ -49,7 +55,7 @@ export class CompaniesListComponent implements OnInit, OnDestroy {
 
 	onSetTotalIncomeComplete() {
 		this._companiesLength--;
-		if (this._companiesLength == 0) {
+		if (this._companiesLength == 0) {	
 			this._companies.sort(this._helpers.compareValues('totalIncome', 'desc'));
 			this.dataSource = new MatTableDataSource(this._companies);
 			this.dataSource.paginator = this.paginator;
@@ -64,6 +70,7 @@ export class CompaniesListComponent implements OnInit, OnDestroy {
 	getCompanies() {
 		return this._companyService.getAll().pipe(takeUntil(this._destroy)).subscribe(
 			stream => {
+				
 				this._companies = stream;
 				this._companiesLength = stream.length;
 
@@ -94,5 +101,10 @@ export class CompaniesListComponent implements OnInit, OnDestroy {
 
 	ngOnDestroy() {
 		this._destroy.unsubscribe();
+	}
+	goTo(company){
+		console.log(company)
+		this._sessionService.currentCompany = company;
+		this._router.navigate(['/company', company.id]);
 	}
 }

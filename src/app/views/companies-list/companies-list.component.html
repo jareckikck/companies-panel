@@ -23,7 +23,7 @@
   <ng-container matColumnDef="details">
     <th mat-header-cell *matHeaderCellDef>Detials</th>
     <td mat-cell *matCellDef="let company">      
-      <a [routerLink]="['/company', company.id]" >
+      <a mat-button (click)="goTo(company)" >
         Details {{company.id}}
       </a>
     </td>

@@ -5,6 +5,7 @@ import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { Company } from 'src/app/models/Company';
 import { Income } from 'src/app/models/Income';
+import { SessionService } from 'src/app/services/session.service';
 
 @Component({
 	selector: 'app-company-details',
@@ -14,10 +15,16 @@ import { Income } from 'src/app/models/Income';
 })
 export class CompanyDetailsComponent implements OnInit {
 
-	constructor(private route: ActivatedRoute, private _companyService: CompanyService) { }
+	constructor(private route: ActivatedRoute, private _companyService: CompanyService, private _sessionService: SessionService) { 
+		this._company = this._sessionService.currentCompany;
+	}
 	private _destroy = new Subject<void>();
 	private _company: Company;
 	private _income;
+	
+	get company(){
+		return this._company;
+	}
 	ngOnInit() {
 		this.route.paramMap.subscribe(
 			params => {
@@ -26,6 +33,7 @@ export class CompanyDetailsComponent implements OnInit {
 				this.getIncomes(id)			
 			}
 		);
+		console.log(this._company);
 	}
 	getIncomes(id){
 		this._companyService.getCompanyIncome(id).pipe(takeUntil(this._destroy)).subscribe(data=>{
