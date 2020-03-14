@@ -23,8 +23,8 @@ export class CompanyService {
 			map(this.extractData));
 	}
 
-	getCompanyIncome(id): Observable<Income[]> {
-		return this.http.get<Income[]>(this._endpoint + 'incomes/' + id);
+	getCompanyIncome(id): Observable<Income> {
+		return this.http.get<Income>(this._endpoint + 'incomes/' + id);
 	}
 	
 	getTotalIncome(id): Observable<any> {

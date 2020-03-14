@@ -1,17 +1,14 @@
 import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { CompanyService } from 'src/app/services/company.service';
-import { Subject, Observable } from 'rxjs';
-import { takeUntil, startWith } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { MatPaginator, MatSort, MatTableDataSource } from '@angular/material';
 import { Company } from 'src/app/models/Company';
 import { HelpersService } from 'src/app/services/helpers.service';
 import { Router } from '@angular/router';
 import { SessionService } from 'src/app/services/session.service';
+import { CacheKeys } from 'src/app/models/cache-keys';
 
-const COMPANIES_CACHE_KEY = 'companies'
-const SORTED_COMPANIES_CACHE_KEY = 'sortedCompanies'
-const CURRENT_COMPANY_KEY = 'currentCompany'
-const CURRENT_COMPANY_ID_KEY = 'currentCompanyId'
+
 @Component({
 	selector: 'app-companies-list',
 	templateUrl: './companies-list.component.html',
@@ -36,8 +33,7 @@ export class CompaniesListComponent implements OnInit, OnDestroy {
 			'lp',
 			'name',
 			'city',
-			'totalIncome',
-			'details'
+			'totalIncome',			
 		]
 	};
 
@@ -66,7 +62,7 @@ export class CompaniesListComponent implements OnInit, OnDestroy {
 	}
 	fetchCompanies() {
 		this._companyService.getAll().subscribe(next => {
-			localStorage[COMPANIES_CACHE_KEY] = JSON.stringify(next);
+			localStorage[CacheKeys.COMPANIES] = JSON.stringify(next);
 			this._companies = next
 		})
 	}
@@ -80,14 +76,14 @@ export class CompaniesListComponent implements OnInit, OnDestroy {
 	}
 
 	isCompaniesSortedListCached() {
-		return localStorage.getItem(SORTED_COMPANIES_CACHE_KEY) !== null
+		return localStorage.getItem(CacheKeys.SORTED_COMPANIES) !== null
 	}
 	isComapniesListCached() {
-		return localStorage.getItem(COMPANIES_CACHE_KEY) !== null
+		return localStorage.getItem(CacheKeys.COMPANIES) !== null
 	}
 
 	useCachedData() {
-		this._companies = JSON.parse(localStorage[SORTED_COMPANIES_CACHE_KEY])
+		this._companies = JSON.parse(localStorage[CacheKeys.SORTED_COMPANIES])
 		this.setDataSource(this._companies);
 	}
 
@@ -101,7 +97,7 @@ export class CompaniesListComponent implements OnInit, OnDestroy {
 	}
 
 	addTotalIncomeToCompanies() {
-		this._companies = JSON.parse(localStorage[COMPANIES_CACHE_KEY])
+		this._companies = JSON.parse(localStorage[CacheKeys.COMPANIES])
 		this._companies.forEach(item => {
 			this.setTotalIncome(item)
 		})
@@ -129,7 +125,7 @@ export class CompaniesListComponent implements OnInit, OnDestroy {
 	
 	cacheCompaniesSortedList() {
 		this._companies.sort(this._helpers.compareValues('totalIncome', 'desc'));
-		localStorage[SORTED_COMPANIES_CACHE_KEY] = JSON.stringify(this._companies);
+		localStorage[CacheKeys.SORTED_COMPANIES] = JSON.stringify(this._companies);
 	}
 
 	setDataSource(item) {
@@ -147,10 +143,9 @@ export class CompaniesListComponent implements OnInit, OnDestroy {
 		this._destroy.unsubscribe();
 	}
 
-	goTo(company) {
-		console.log(company)
-		localStorage[CURRENT_COMPANY_KEY] = JSON.stringify(company);
-		localStorage[CURRENT_COMPANY_ID_KEY] = JSON.stringify(company.id);
+	navigateTo(company) {		
+		localStorage[CacheKeys.CURRENT_COMPANY] = JSON.stringify(company);
+		localStorage[CacheKeys.CURRENT_COMPANY_ID] = JSON.stringify(company.id);
 		this._sessionService.currentCompany = company;
 		this._router.navigate(['/company', company.id]);
 	}

@@ -1,3 +1,28 @@
-table{
-	WIDTH: 100%;
+table {
+  width: calc( 100% - 2rem);  
+  margin: 0 1rem;
+}
+
+table tr:nth-child(2n) {
+  background-color: #efefef;
+}
+
+table tr:hover {
+  background-color: #ddd;
+  transition: 0.5s all ease;
+  cursor: pointer;
+}
+.spacing {
+  margin: 1rem 1rem 0;
+}
+
+.flex {
+  margin: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.p-t{
+	padding-top: 2rem;
 }
