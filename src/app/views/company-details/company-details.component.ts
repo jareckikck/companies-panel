@@ -6,6 +6,8 @@ import { Subject } from 'rxjs';
 import { Company } from 'src/app/models/Company';
 import { Income } from 'src/app/models/Income';
 import { CacheKeys } from 'src/app/models/cache-keys';
+import { HelpersService } from 'src/app/services/helpers.service';
+import { FormControl } from '@angular/forms';
 
 @Component({
 	selector: 'app-company-details',
@@ -19,12 +21,14 @@ export class CompanyDetailsComponent implements OnInit {
 	constructor(
 		private route: ActivatedRoute,
 		private _companyService: CompanyService,
+		private _helersService: HelpersService
 	) { }
 
 	private _destroy = new Subject<void>();
 	private _company: Company;
 	private _income: Income;
 	private _id: number;
+	range: FormControl;
 
 	get company() {
 		return this._company;
@@ -34,6 +38,7 @@ export class CompanyDetailsComponent implements OnInit {
 	}
 
 	ngOnInit() {
+		this.range = new FormControl({ value: '', disabled: false })
 		this.route.paramMap.subscribe(
 			params => {
 				this._id = parseInt(params.get('id'));
@@ -81,4 +86,51 @@ export class CompanyDetailsComponent implements OnInit {
 		)
 	}
 
+	// total income from current range
+	get total(): number {
+		let total = 0;
+		this.filteredIncomes.forEach(el => {
+			total += parseInt(el.value);
+		})
+		return total;
+	}
+	// avarage income from current range 
+	get avarage() {		
+		let length = this.filteredIncomes.length
+		return this.total / length;
+	}
+	
+	get incomes() {
+		return this.income !== undefined ? this.income.incomes.sort(this._helersService.compareValues('date', 'desc')) : [];
+	}
+	
+	get currentIncomes() {
+		let current = this.incomes.filter(el => el.date)
+		return current;
+	}
+	get maxDate() {
+		return this.incomes[0] ? new Date(this.incomes[0].date) : new Date();
+	}
+	get minDate() {
+		return this.incomes[this.incomes.length - 1] ? new Date(this.incomes[this.incomes.length - 1].date) : new Date('2000-01-19T05:25:37.412Z');
+	}
+	get startDate() {
+		let start =  this.range.value.begin ? this.range.value.begin : this.minDate		
+		return new Date(start)
+	}
+	get endDate() {
+		let end  = this.range.value.end ? this.range.value.end : this.maxDate;	
+		return new Date(end);
+	}
+	get filteredIncomes() {
+		return this.incomes.filter(el => {
+			return new Date(el.date) >= this.startDate && new Date(el.date) <= this.endDate
+		});
+	}
+
+
 }
+
+
+// filter 
+// range date for income calc (total + avarage )
