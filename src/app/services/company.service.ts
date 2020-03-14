@@ -26,9 +26,7 @@ export class CompanyService {
 	getCompanyIncome(id): Observable<Income[]> {
 		return this.http.get<Income[]>(this._endpoint + 'incomes/' + id);
 	}
-	get(id){
-		return this.http.get<Company>(this._endpoint + 'companies/' + id)
-	}
+	
 	getTotalIncome(id): Observable<any> {
 		return this.http.get<any>(this._endpoint + 'incomes/' + id).pipe(
 			map(res => {
@@ -40,6 +38,14 @@ export class CompanyService {
 			})
 		)
 	}
-	
+
+	getCompany(id) {
+		return this.http.get<Company[]>(this._endpoint + 'companies').pipe(
+			map(res => {
+				let test = res.filter(res => res.id == id)
+				return test[0]
+			}))
+
+	}
 }
 
