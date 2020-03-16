@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, ElementRef, ViewChild } from '@angular/core';
 import * as d3 from 'd3';
+import { CacheKeys } from 'src/app/models/cache-keys';
 
 @Component({
 	selector: 'app-chart',
@@ -9,10 +10,8 @@ import * as d3 from 'd3';
 export class ChartComponent implements OnInit {
 	@ViewChild('chart', { static: true }) private chartContainer: ElementRef;
 
-
 	@Input() data
-	private _currentData;
-	private margin: any = { top: 20, bottom: 20, left: 20, right: 20 };
+	private margin: any = { top: 50, bottom: 50, left: 50, right: 50 };
 	private chart: any;
 	private width: number;
 	private height: number;
@@ -21,25 +20,36 @@ export class ChartComponent implements OnInit {
 	private colors: any;
 	private xAxis: any;
 	private yAxis: any;
+	private tooltip: any;
 
 	constructor() { }
 
 	ngOnInit() {
 		this.createChart();
 		if (this.data) {
+			localStorage[CacheKeys.CHART_DATA] = JSON.stringify(this.data);
 			this.updateChart();
 		}
 	}
 
 	ngOnChanges() {
-		if (this.chart && this.data !== this._currentData) {
+		if (localStorage.getItem(CacheKeys.CHART_DATA) !== JSON.stringify(this.data)) {
+			localStorage[CacheKeys.CHART_DATA] = JSON.stringify(this.data);
 			this.updateChart();
 		}
-		// if () {
-		// }
 	}
 
 	createChart() {
+		// const tooltipBody = '<div><div class="1"></div><div class="2"> </div></div>'
+		this.tooltip = d3.select('body').append("div")
+			.classed('chart-tooltip', true)
+			.style('display', 'none');
+
+		this.tooltip.append("div")
+			.classed('tooltip-val', true)
+		this.tooltip.append("div")
+			.classed('tooltip-date', true)
+
 
 		let element = this.chartContainer.nativeElement;
 		this.width = element.offsetWidth - this.margin.left - this.margin.right;
@@ -62,7 +72,7 @@ export class ChartComponent implements OnInit {
 		this.yScale = d3.scaleLinear().domain(yDomain).range([this.height, 0]);
 
 		// bar colors
-		this.colors = d3.scaleLinear().domain([0, this.data.length]).range(<any[]>['red', 'blue']);
+		this.colors = d3.scaleLinear().domain([0, this.data.length]).range(<any[]>['blue', 'blue']);
 
 		// x & y axis
 		this.xAxis = svg.append('g')
@@ -110,6 +120,24 @@ export class ChartComponent implements OnInit {
 			.transition()
 			.delay((d, i) => i * 10)
 			.attr('y', d => this.yScale(d[1]))
-			.attr('height', d => this.height - this.yScale(d[1]));
+			.attr('height', d => this.height - this.yScale(d[1]))
+
+		console.log('add mouseover ')
+
+		this.chart.selectAll('.bar')
+			.on("mouseover", () => {
+				this.tooltip.style("display", null)
+			})
+			.on("mouseout", () => {
+				this.tooltip.style("display", "none")
+			})
+			.on("mousemove", (d: any) => {
+				this.tooltip
+					.style("left", d3.event.pageX + 15 + "px")
+					.style("top", d3.event.pageY - 25 + "px")
+				d3.select('.tooltip-val').text('Value: ' + d[1])
+				d3.select('.tooltip-date').text('Date: ' + d[0])
+			});
 	}
+
 }

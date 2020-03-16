@@ -3,4 +3,5 @@ export enum CacheKeys {
 	SORTED_COMPANIES = 'sortedCompanies',
 	CURRENT_COMPANY = 'currentCompany',
 	CURRENT_COMPANY_ID = 'currentCompanyId',
+	CHART_DATA = 'chartData'
 }

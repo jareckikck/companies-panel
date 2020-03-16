@@ -11,24 +11,14 @@
         readonly="readonly"
         [min]="minDate"
         [max]="maxDate"
+        (dateChange)="addEvent('change', $event)"
       />
       <sat-datepicker #picker [rangeMode]="true"></sat-datepicker>
       <sat-datepicker-toggle matSuffix [for]="picker"></sat-datepicker-toggle>
     </mat-form-field>
     total: {{ total }} avarage: {{ avarage }}
     <br />
-    <strong>begin - {{ startDate | date: "dd/MM/yyyy" }} </strong> <br />
-    <strong>end - {{ endDate | date: "dd/MM/yyyy" }} </strong><br />
-    <strong>maxDate {{ maxDate | date: "dd/MM/yyyy" }}</strong> <br />
-    <strong>minDate {{ minDate | date: "dd/MM/yyyy" }}</strong> <br />
   </mat-card-content>
-  {{chartData.length}}
+
   <app-chart *ngIf="chartData.length" [data]="chartData"></app-chart>
-  
-  <div *ngFor="let income of filteredIncomes">
-    <p>
-      <strong>{{ income.date | date: "dd/MM/yyyy" }}</strong>
-      {{ income.value }}
-    </p>
-  </div>
 </mat-card>
