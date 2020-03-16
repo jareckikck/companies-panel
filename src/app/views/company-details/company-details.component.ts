@@ -26,7 +26,7 @@ export class CompanyDetailsComponent implements OnInit {
 
 	private _destroy = new Subject<void>();
 	private _company: Company;
-	private _income: Income;
+	private _income: Income;	
 	private _id: number;
 	range: FormControl;
 
@@ -95,19 +95,15 @@ export class CompanyDetailsComponent implements OnInit {
 		return total;
 	}
 	// avarage income from current range 
-	get avarage() {		
+	get avarage() {
 		let length = this.filteredIncomes.length
 		return this.total / length;
 	}
-	
+
 	get incomes() {
-		return this.income !== undefined ? this.income.incomes.sort(this._helersService.compareValues('date', 'desc')) : [];
+		return this._income !== undefined ? this._income.incomes.sort(this._helersService.compareValues('date', 'desc')) : [];
 	}
 	
-	get currentIncomes() {
-		let current = this.incomes.filter(el => el.date)
-		return current;
-	}
 	get maxDate() {
 		return this.incomes[0] ? new Date(this.incomes[0].date) : new Date();
 	}
@@ -115,22 +111,26 @@ export class CompanyDetailsComponent implements OnInit {
 		return this.incomes[this.incomes.length - 1] ? new Date(this.incomes[this.incomes.length - 1].date) : new Date('2000-01-19T05:25:37.412Z');
 	}
 	get startDate() {
-		let start =  this.range.value.begin ? this.range.value.begin : this.minDate		
+		let start = this.range.value.begin ? this.range.value.begin : this.minDate
 		return new Date(start)
 	}
 	get endDate() {
-		let end  = this.range.value.end ? this.range.value.end : this.maxDate;	
+		let end = this.range.value.end ? this.range.value.end : this.maxDate;
 		return new Date(end);
 	}
 	get filteredIncomes() {
+		console.log('get filtered')
 		return this.incomes.filter(el => {
 			return new Date(el.date) >= this.startDate && new Date(el.date) <= this.endDate
 		});
 	}
-
-
+	get chartData() {
+		let chartData = [];
+		this.filteredIncomes.forEach(el => {
+			chartData.push([el.date, parseInt(el.value)])
+		})
+		console.log('get chartData')
+		console.log(chartData)
+		return chartData;
+	}
 }
-
-
-// filter 
-// range date for income calc (total + avarage )

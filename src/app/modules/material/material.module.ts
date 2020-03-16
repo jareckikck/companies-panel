@@ -20,7 +20,7 @@ const material = [
 	SatDatepickerModule,
 	SatNativeDateModule,
 	FormsModule,
-	ReactiveFormsModule
+	ReactiveFormsModule,
 ]
 @NgModule({
 	imports: [material],

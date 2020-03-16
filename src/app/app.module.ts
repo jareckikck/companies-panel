@@ -6,11 +6,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ViewsModule } from './views/views.module';
 import { AppRoutingModule } from './app-routing.module';
 
-
-
 @NgModule({
 	declarations: [
-		AppComponent,		
+		AppComponent,			
 	],
 	imports: [
 		
